@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from pathlib import Path
-import os
+
 from openkb.config import OpenKBConfig
 
 
-def test_config_resolves_workspace(tmp_path, monkeypatch):
+def test_config_resolves_workspace(tmp_path: Path, monkeypatch) -> None:
     root = tmp_path / "openkb"
     (root / "workspace" / "projects").mkdir(parents=True)
     monkeypatch.setenv("OPENKB_ROOT", str(root))

@@ -9,7 +9,6 @@ def _detect_root() -> Path:
     env = os.environ.get("OPENKB_ROOT")
     if env:
         return Path(env).resolve()
-    # package at server/src/openkb → repo root is 3 levels up
     return Path(__file__).resolve().parents[3]
 
 

@@ -2,6 +2,8 @@
 .uv-cache/
 web/node_modules/
 web/dist/
+.npm-cache/
 __pycache__/
 *.pyc
 .env
+.pytest_cache/
