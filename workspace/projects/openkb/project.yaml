@@ -1,0 +1,8 @@
+slug: openkb
+name: OpenKB
+repo_path: E:/AProject/TianX/Personal/OpenKB
+description: Agent 中心化 Kanban 与进度对齐平台
+status: active
+default_branch: main
+lock_ttl_hours: 4
+created: "2026-05-20"

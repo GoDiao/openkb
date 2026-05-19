@@ -1,0 +1,43 @@
+[project]
+name = "openkb"
+version = "0.1.0"
+description = "Centralized Agent Kanban platform"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "typer[all]>=0.15.0",
+  "pyyaml>=6.0.2",
+  "python-frontmatter>=1.1.0",
+  "pydantic>=2.10.0",
+  "httpx>=0.28.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3.0", "pytest-asyncio>=0.24.0"]
+
+[project.scripts]
+openkb = "openkb.cli.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["server/src/openkb"]
+
+[tool.hatch.build.targets.wheel.sources]
+"server/src/openkb" = "openkb"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["server/src"]
+
+[tool.uv]
+cache-dir = "E:/AProject/TianX/Personal/OpenKB/.uv-cache"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+]
