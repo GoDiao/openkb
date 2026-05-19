@@ -318,6 +318,23 @@ def _is_available(task: TaskModel, agent_id: str, now: datetime) -> bool:
     return True
 
 
+def update_task(
+    cfg: OpenKBConfig,
+    slug: str,
+    task_id: str,
+    **fields: object,
+) -> TaskModel:
+    pdir = cfg.project_dir(slug)
+    path, col = _find_task_path(pdir, task_id)
+    task = _load_task(path, col)
+    for key, value in fields.items():
+        if value is not None and hasattr(task, key):
+            setattr(task, key, value)
+    task.updated = _iso(_utc_now())
+    _save_task(path, task, col)
+    return _load_task(path, col)
+
+
 def append_note(
     cfg: OpenKBConfig,
     slug: str,
