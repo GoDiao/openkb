@@ -318,6 +318,48 @@ def _is_available(task: TaskModel, agent_id: str, now: datetime) -> bool:
     return True
 
 
+def append_note(
+    cfg: OpenKBConfig,
+    slug: str,
+    task_id: str,
+    text: str,
+) -> TaskModel:
+    pdir = cfg.project_dir(slug)
+    path, col = _find_task_path(pdir, task_id)
+    task = _load_task(path, col)
+    now = _iso(_utc_now())
+    if task.notes:
+        task.notes = task.notes.rstrip() + f"\n\n{text}"
+    else:
+        task.notes = text
+    task.updated = now
+    _save_task(path, task, col)
+    return task
+
+
+def toggle_acceptance(
+    cfg: OpenKBConfig,
+    slug: str,
+    task_id: str,
+    index: int,
+) -> TaskModel:
+    pdir = cfg.project_dir(slug)
+    path, col = _find_task_path(pdir, task_id)
+    task = _load_task(path, col)
+    if index < 1 or index > len(task.acceptance):
+        raise NotFoundError(f"Acceptance item {index} not found")
+    item = task.acceptance[index - 1]
+    if re.match(r"^- \[[xX]\]", item):
+        task.acceptance[index - 1] = re.sub(r"^- \[[xX]\]", "- [ ]", item, count=1)
+    elif re.match(r"^- \[ \]", item):
+        task.acceptance[index - 1] = re.sub(r"^- \[ \]", "- [x]", item, count=1)
+    else:
+        raise NotFoundError(f"Invalid acceptance item at index {index}")
+    task.updated = _iso(_utc_now())
+    _save_task(path, task, col)
+    return task
+
+
 def next_task(cfg: OpenKBConfig, slug: str, agent_id: str) -> TaskModel | None:
     board = list_board(cfg, slug)
     now = _utc_now()
