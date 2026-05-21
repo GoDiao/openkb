@@ -6,7 +6,7 @@ Centralized **Agent Kanban + project state hub**: coding agents align progress v
 
 Data lives under `workspace/projects/{slug}/` — not scattered as `.openkb/` in each business repo.
 
-> **Why OpenKB?** [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md) · **中文:** [README.zh-CN.md](README.zh-CN.md) · **License:** [MIT](LICENSE) · **v1.1.0**
+> **Why OpenKB?** [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md) · **中文:** [README.zh-CN.md](README.zh-CN.md) · **Landing:** [godiao.github.io/openkb](https://godiao.github.io/openkb/) · **License:** [MIT](LICENSE) · **v1.1.0**
 
 <p align="center">
   <img src="docs/assets/demo/01-hub-projects.png" alt="Project hub" width="720" />

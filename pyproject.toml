@@ -22,7 +22,7 @@ dev = ["pytest>=8.3.0", "pytest-asyncio>=0.24.0"]
 openkb = "openkb.cli.main:app"
 
 [project.urls]
-Homepage = "https://github.com/GoDiao/openkb"
+Homepage = "https://godiao.github.io/openkb/"
 Repository = "https://github.com/GoDiao/openkb"
 Documentation = "https://github.com/GoDiao/openkb/blob/master/README.md"
 Changelog = "https://github.com/GoDiao/openkb/blob/master/CHANGELOG.md"

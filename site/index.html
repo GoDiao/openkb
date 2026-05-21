@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dusk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="OpenKB — Agents sync via CLI. Humans read Spec, Plan, and roadmap in one Web Hub. MIT open source." />
+  <meta name="theme-color" content="#0c0d10" />
+  <title>OpenKB — Agent CLI × Web Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base: #0c0d10;
+      --bg-surface: #14161c;
+      --bg-elevated: #1a1d26;
+      --text-primary: #e8e6e3;
+      --text-muted: #8b909a;
+      --accent: #c9a87c;
+      --accent-soft: rgba(201, 168, 124, 0.14);
+      --success: #7eb09a;
+      --danger: #d4847f;
+      --border: rgba(255, 255, 255, 0.07);
+      --glow-a: rgba(201, 168, 124, 0.18);
+      --glow-b: rgba(126, 176, 154, 0.12);
+      --font-serif: "Instrument Serif", "Noto Serif SC", Georgia, serif;
+      --font-sans: "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --radius: 14px;
+      --max: 1120px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, var(--glow-a), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 0%, var(--glow-b), transparent 50%),
+        var(--bg-base);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(var(--max), calc(100% - 2.5rem));
+      margin-inline: auto;
+    }
+
+    /* Nav */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: color-mix(in srgb, var(--bg-base) 82%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      color: var(--bg-base);
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+    }
+
+    .nav-links a { color: var(--text-muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text-primary); text-decoration: none; }
+
+    .lang-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .lang-toggle button {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 0.35rem 0.65rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .lang-toggle button.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.15rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+      border: 1px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-base);
+      box-shadow: 0 4px 24px rgba(201, 168, 124, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(201, 168, 124, 0.35);
+      text-decoration: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-elevated);
+      text-decoration: none;
+    }
+
+    /* Hero */
+    .hero {
+      padding: clamp(3rem, 8vw, 5.5rem) 0 3rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      background: var(--accent-soft);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 400;
+      line-height: 1.12;
+      margin: 0 0 1rem;
+      max-width: 14ch;
+      animation: fadeUp 0.7s 0.08s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-lead {
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      color: var(--text-muted);
+      max-width: 52ch;
+      margin: 0 0 1.75rem;
+      animation: fadeUp 0.7s 0.16s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.7s 0.24s ease both;
+    }
+
+    .hero-visual {
+      position: relative;
+      animation: fadeUp 0.9s 0.32s ease both;
+    }
+
+    .hero-frame {
+      border-radius: calc(var(--radius) + 4px);
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      overflow: hidden;
+      box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    }
+
+    .hero-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hero-chrome {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-r { background: #d4847f; }
+    .dot-y { background: #c9a87c; }
+    .dot-g { background: #7eb09a; }
+
+    .float-card {
+      position: absolute;
+      right: -1rem;
+      bottom: 1.5rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      animation: float 4s ease-in-out infinite;
+      max-width: 220px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Flow */
+    section { padding: clamp(3rem, 7vw, 5rem) 0; }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 400;
+      margin: 0 0 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 58ch;
+      margin: 0 0 2rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .flow-grid { grid-template-columns: 1fr; }
+      .float-card { display: none; }
+      .nav-links .hide-sm { display: none; }
+    }
+
+    .flow-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    .flow-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .flow-card h3 {
+      font-size: 1rem;
+      margin: 0 0 0.4rem;
+      font-weight: 600;
+    }
+
+    .flow-card p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    code, .code-block {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    .code-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      overflow-x: auto;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    .code-block .cmd { color: var(--success); }
+    .code-block .flag { color: var(--accent); }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .gallery { grid-template-columns: 1fr; }
+    }
+
+    .gallery-item {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg-surface);
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      display: block;
+    }
+
+    .gallery-cap {
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Compare table */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td:first-child { font-weight: 500; white-space: nowrap; }
+
+    .yes { color: var(--success); }
+    .no { color: var(--danger); }
+    .warn { color: var(--accent); }
+
+    /* Security */
+    .security-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .security-box { grid-template-columns: 1fr; }
+    }
+
+    .sec-list {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .sec-list h3 {
+      font-size: 0.85rem;
+      margin: 0 0 0.75rem;
+      font-family: var(--font-mono);
+    }
+
+    .sec-list ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .sec-list li {
+      padding: 0.4rem 0;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .sec-ok h3 { color: var(--success); }
+    .sec-no h3 { color: var(--danger); }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 6px);
+      background:
+        radial-gradient(ellipse at center, var(--accent-soft), transparent 70%),
+        var(--bg-surface);
+      margin-bottom: 3rem;
+    }
+
+    .cta h2 { margin-bottom: 0.5rem; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    footer a { color: var(--text-muted); }
+    footer a:hover { color: var(--accent); }
+
+    [data-lang="en"] { display: none; }
+    html.lang-en [data-lang="zh"] { display: none; }
+    html.lang-en [data-lang="en"] { display: revert; }
+    html.lang-en h1, html.lang-en h2 { font-family: var(--font-serif); }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="logo" href="#">
+        <span class="logo-mark">KB</span>
+        OpenKB
+      </a>
+      <div class="nav-links">
+        <a class="hide-sm" href="#flow" data-lang="zh">工作流</a>
+        <a class="hide-sm" href="#flow" data-lang="en">Workflow</a>
+        <a class="hide-sm" href="#compare" data-lang="zh">对比</a>
+        <a class="hide-sm" href="#compare" data-lang="en">Compare</a>
+        <a class="hide-sm" href="#install" data-lang="zh">安装</a>
+        <a class="hide-sm" href="#install" data-lang="en">Install</a>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" class="active" data-set-lang="zh">中文</button>
+          <button type="button" data-set-lang="en">EN</button>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/GoDiao/openkb" target="_blank" rel="noopener">
+          <span data-lang="zh">GitHub</span>
+          <span data-lang="en">GitHub</span>
+          ↗
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero wrap">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span data-lang="zh">MIT · v1.1.0 · 自托管</span>
+      <span data-lang="en">MIT · v1.1.0 · Self-hosted</span>
+    </div>
+    <h1>
+      <span data-lang="zh">Agent 用 <em>CLI</em> 对齐进度，人类用 Web 看 Spec / Plan / 路线图</span>
+      <span data-lang="en">Agents sync via <em>CLI</em>. Humans read Spec, Plan &amp; roadmap in one Hub.</span>
+    </h1>
+    <p class="hero-lead">
+      <span data-lang="zh">OpenKB 是 Agent 中心化的 Kanban + 项目状态 Hub。任务、STATE、路线图、ADR 统一在 <code>workspace/</code>，不再在每个业务仓库散落 <code>.openkb/</code>。</span>
+      <span data-lang="en">OpenKB is a centralized Agent Kanban + project state hub. Tasks, STATE, roadmap, and ADRs live under <code>workspace/</code> — not scattered <code>.openkb/</code> folders in every repo.</span>
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://github.com/GoDiao/openkb" target="_blank" rel="noopener">
+        <span data-lang="zh">⭐ Star on GitHub</span>
+        <span data-lang="en">⭐ Star on GitHub</span>
+      </a>
+      <a class="btn btn-ghost" href="#install">
+        <span data-lang="zh">5 分钟上手</span>
+        <span data-lang="en">Quick start</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/GoDiao/openkb/releases/tag/v1.1.0" target="_blank" rel="noopener">
+        v1.1.0 Release
+      </a>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <div class="hero-chrome">
+          <span class="dot dot-r"></span>
+          <span class="dot dot-y"></span>
+          <span class="dot dot-g"></span>
+          <span style="margin-left:0.5rem">127.0.0.1:8788 — OpenKB Hub</span>
+        </div>
+        <img src="assets/demo/01-hub-projects.png" alt="OpenKB project hub" width="1120" height="630" loading="eager" />
+      </div>
+      <div class="float-card">
+        <span style="color:var(--success)">●</span> live sync<br />
+        <span style="color:var(--text-muted)">openkb done → WebSocket → Hub</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="flow" class="wrap">
+    <p class="section-label" data-lang="zh">30 秒看懂</p>
+    <p class="section-label" data-lang="en">In 30 seconds</p>
+    <h2>
+      <span data-lang="zh">一条链路，两种界面</span>
+      <span data-lang="en">One pipeline, two surfaces</span>
+    </h2>
+    <p class="section-desc">
+      <span data-lang="zh">Coding Agent（Claude Code、Cursor、Codex…）走 CLI；产品经理和你在浏览器里读文档、看板、路线图，变更实时同步。</span>
+      <span data-lang="en">Coding agents (Claude Code, Cursor, Codex…) use the CLI. You read docs, Kanban, and roadmap in the browser — changes sync live.</span>
+    </p>
+    <div class="flow-grid">
+      <article class="flow-card">
+        <div class="flow-num">01</div>
+        <h3 data-lang="zh">Checkout 任务</h3>
+        <h3 data-lang="en">Checkout task</h3>
+        <p><code>openkb checkout</code> — <span data-lang="zh">带锁与审计</span><span data-lang="en">locks &amp; audit</span></p>
+      </article>
+      <article class="flow-card">
+        <div class="flow-num">02</div>
+        <h3 data-lang="zh">Done 收尾</h3>
+        <h3 data-lang="en">Done &amp; sync</h3>
+        <p><code>openkb done</code> — <span data-lang="zh">看板 · STATE · 会话 · 路线图</span><span data-lang="en">board · STATE · session · roadmap</span></p>
+      </article>
+      <article class="flow-card">
+        <div class="flow-num">03</div>
+        <h3 data-lang="zh">Hub 实时可见</h3>
+        <h3 data-lang="en">Hub updates live</h3>
+        <p data-lang="zh">WebSocket 推送 + 轮询兜底</p>
+        <p data-lang="en">WebSocket push with polling fallback</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="section-label" data-lang="zh">界面预览</p>
+    <p class="section-label" data-lang="en">Screenshots</p>
+    <h2>
+      <span data-lang="zh">为 Agent 工作流设计的 Hub</span>
+      <span data-lang="en">A Hub built for agent workflows</span>
+    </h2>
+    <div class="gallery" style="margin-top:1.5rem">
+      <figure class="gallery-item">
+        <img src="assets/demo/02-overview.png" alt="Overview dashboard" loading="lazy" />
+        <figcaption class="gallery-cap">Overview — <span data-lang="zh">进度环 · 看板图表</span><span data-lang="en">progress ring · board chart</span></figcaption>
+      </figure>
+      <figure class="gallery-item">
+        <img src="assets/demo/03-kanban.png" alt="Kanban board" loading="lazy" />
+        <figcaption class="gallery-cap">Kanban — <span data-lang="zh">拖拽 + CLI 对齐</span><span data-lang="en">drag UI + CLI truth</span></figcaption>
+      </figure>
+      <figure class="gallery-item">
+        <img src="assets/demo/04-roadmap.png" alt="Roadmap graph" loading="lazy" />
+        <figcaption class="gallery-cap">Roadmap — <span data-lang="zh">交互式阶段图</span><span data-lang="en">interactive phase graph</span></figcaption>
+      </figure>
+      <figure class="gallery-item">
+        <img src="assets/demo/01-hub-projects.png" alt="Project list" loading="lazy" />
+        <figcaption class="gallery-cap">Projects — <span data-lang="zh">多项目 Hub</span><span data-lang="en">multi-project hub</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="compare" class="wrap">
+    <p class="section-label" data-lang="zh">为什么不是 Jira / 纯 Markdown</p>
+    <p class="section-label" data-lang="en">Why not Jira / plain Markdown</p>
+    <h2>
+      <span data-lang="zh">对比一览</span>
+      <span data-lang="en">At a glance</span>
+    </h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>OpenKB</th>
+            <th>Linear / Jira</th>
+            <th><span data-lang="zh">纯 Markdown</span><span data-lang="en">Markdown repo</span></th>
+            <th>.openkb/ …</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span data-lang="zh">为 Coding Agent 设计</span><span data-lang="en">Built for coding agents</span></td>
+            <td class="yes">✓ CLI-first</td>
+            <td class="no">✗ Human PM</td>
+            <td class="warn">△ Manual files</td>
+            <td class="warn">△ Per-repo</td>
+          </tr>
+          <tr>
+            <td><span data-lang="zh">看板 + STATE + 路线图</span><span data-lang="en">Board + STATE + roadmap</span></td>
+            <td class="yes">✓ One hub</td>
+            <td class="warn">△ Plugins</td>
+            <td class="warn">△ DIY</td>
+            <td class="warn">△ Drift</td>
+          </tr>
+          <tr>
+            <td><span data-lang="zh">CLI → UI 实时同步</span><span data-lang="en">CLI → UI live sync</span></td>
+            <td class="yes">✓ WebSocket</td>
+            <td class="yes">✓ Cloud SaaS</td>
+            <td class="no">✗ Refresh</td>
+            <td class="no">✗ Custom</td>
+          </tr>
+          <tr>
+            <td><span data-lang="zh">Spec/Plan 在业务仓库</span><span data-lang="en">Spec/Plan in business repo</span></td>
+            <td class="yes">✓ repo_path</td>
+            <td class="no">✗ Separate</td>
+            <td class="yes">✓ Git native</td>
+            <td class="warn">△ Dual truth</td>
+          </tr>
+          <tr>
+            <td><span data-lang="zh">自托管 / 离线</span><span data-lang="en">Self-hosted / offline</span></td>
+            <td class="yes">✓ uv + Docker</td>
+            <td class="no">✗ Vendor cloud</td>
+            <td class="yes">✓ Git only</td>
+            <td class="yes">✓ If you build</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="section-label" data-lang="zh">安全边界</p>
+    <p class="section-label" data-lang="en">Security model</p>
+    <h2>
+      <span data-lang="zh">可信内网工具，不是公网 SaaS</span>
+      <span data-lang="en">Trusted-network tool, not public SaaS</span>
+    </h2>
+    <p class="section-desc">
+      <span data-lang="zh">OpenKB 1.x 无登录鉴权。适合本机、局域网、私有 Docker — 请勿将 <code>:8788</code> 裸奔到公网。</span>
+      <span data-lang="en">OpenKB 1.x has no auth. Use on localhost, LAN, or private Docker — do not expose <code>:8788</code> to the public internet.</span>
+    </p>
+    <div class="security-box">
+      <div class="sec-list sec-ok">
+        <h3>✅ OK</h3>
+        <ul>
+          <li><span data-lang="zh">本机 127.0.0.1</span><span data-lang="en">localhost 127.0.0.1</span></li>
+          <li><span data-lang="zh">局域网 / VPN / 私有 Docker</span><span data-lang="en">LAN / VPN / private Docker</span></li>
+          <li><span data-lang="zh">反代 + TLS + 自建鉴权</span><span data-lang="en">Reverse proxy + TLS + your auth</span></li>
+        </ul>
+      </div>
+      <div class="sec-list sec-no">
+        <h3>❌ Not v1.x</h3>
+        <ul>
+          <li><span data-lang="zh">公网 VPS 裸奔 0.0.0.0:8788</span><span data-lang="en">Public VPS on 0.0.0.0:8788</span></li>
+          <li><span data-lang="zh">多租户 SaaS（v2 工程）</span><span data-lang="en">Multi-tenant SaaS (v2 scope)</span></li>
+          <li><span data-lang="zh">无鉴权的演示站写操作</span><span data-lang="en">Writable public demo without auth</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="wrap">
+    <p class="section-label" data-lang="zh">快速开始</p>
+    <p class="section-label" data-lang="en">Quick start</p>
+    <h2>
+      <span data-lang="zh">Clone → uv → serve</span>
+      <span data-lang="en">Clone → uv → serve</span>
+    </h2>
+    <pre class="code-block"><span class="cmd">git clone</span> https://github.com/GoDiao/openkb.git
+<span class="cmd">cd</span> openkb
+<span class="cmd">uv sync</span> <span class="flag">--extra dev</span>
+<span class="cmd">cd</span> web && npm ci && npm run build
+<span class="cmd">export</span> OPENKB_ROOT="$(pwd)" OPENKB_AGENT_ID="my-agent"
+<span class="cmd">uv run openkb serve</span> <span class="flag">--port 8788</span>
+<span style="color:var(--text-muted)"># → http://127.0.0.1:8788</span></pre>
+  </section>
+
+  <div class="wrap">
+    <div class="cta">
+      <h2>
+        <span data-lang="zh">开源 · MIT · 欢迎贡献</span>
+        <span data-lang="en">Open source · MIT · Contributions welcome</span>
+      </h2>
+      <p style="color:var(--text-muted);margin:0 0 1.25rem">
+        <span data-lang="zh">Star、Issue、PR — 从 Good first issue 开始</span>
+        <span data-lang="en">Star, open issues, send PRs — start with Good first issues</span>
+      </p>
+      <a class="btn btn-primary" href="https://github.com/GoDiao/openkb" target="_blank" rel="noopener">
+        github.com/GoDiao/openkb ↗
+      </a>
+    </div>
+  </div>
+
+  <footer class="wrap">
+    <span>© OpenKB · MIT License</span>
+    <span>
+      <a href="https://github.com/GoDiao/openkb/blob/master/docs/WHY_OPENKB.zh-CN.md" data-lang="zh">文档</a>
+      <a href="https://github.com/GoDiao/openkb/blob/master/docs/WHY_OPENKB.md" data-lang="en">Docs</a>
+      ·
+      <a href="https://github.com/GoDiao/openkb/blob/master/SECURITY.md">Security</a>
+      ·
+      <a href="https://github.com/GoDiao/openkb/releases">Releases</a>
+    </span>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var saved = localStorage.getItem("openkb-landing-lang");
+      if (saved === "en") root.classList.add("lang-en");
+
+      document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var lang = btn.getAttribute("data-set-lang");
+          root.classList.toggle("lang-en", lang === "en");
+          localStorage.setItem("openkb-landing-lang", lang);
+          document.querySelectorAll(".lang-toggle button").forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-set-lang") === lang);
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
