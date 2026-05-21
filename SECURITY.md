@@ -1,14 +1,24 @@
 # Security Policy
 
-OpenKB **1.0** is built for **local or private-network** use by a trusted operator and their coding agents. It is **not** hardened for public internet exposure.
+OpenKB **1.x** is built for **local or private-network** use by a trusted operator and their coding agents. It is **not** hardened for public internet exposure.
+
+> **If you star, fork, or demo this project:** treat it as **self-hosted dev infra**, not a public SaaS. See [Public messaging](#public-messaging) below.
 
 ## Supported deployment model
 
-| OK | Not supported in v1.0 |
-|----|------------------------|
-| `127.0.0.1` on your machine | Public VPS without a reverse proxy + auth |
+| ✅ OK | ❌ Not supported in v1.x |
+|-------|---------------------------|
+| `127.0.0.1` on your machine | Public VPS without reverse proxy + auth |
 | LAN / VPN among teammates | Multi-tenant SaaS |
-| Docker on a private host | Exposing port 8788 directly to the internet |
+| Docker on a private host | Exposing port `8788` directly to the internet |
+
+## Public messaging
+
+When describing OpenKB externally (README, talks, social posts):
+
+- **Say:** “Run on localhost or your private network; agents use CLI, humans use the Hub.”
+- **Do not say:** “Deploy to a public server” without adding TLS, firewall rules, and authentication you maintain yourself.
+- **Future SaaS** (auth, multi-tenant, audit) is **v2+** scope — not included in 1.1.
 
 ## Threat model (summary)
 
@@ -27,10 +37,11 @@ OpenKB **1.0** is built for **local or private-network** use by a trusted operat
 
 ## Reporting vulnerabilities
 
-If you find a security issue, please report privately to the repository maintainer (GitHub Security Advisories or direct contact). Do not open public issues for exploitable bugs until a fix is available.
+If you find a security issue, please report privately via [GitHub Security Advisories](https://github.com/GoDiao/openkb/security/advisories/new). Do not open public issues for exploitable bugs until a fix is available.
 
 ## Related docs
 
 - [README.md](README.md) — installation and production notes
+- [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md) — safe positioning for open source
 - [UPGRADE.md](UPGRADE.md) — version changes
 - [CHANGELOG.md](CHANGELOG.md) — release notes

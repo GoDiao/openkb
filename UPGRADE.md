@@ -1,6 +1,29 @@
-# Upgrading to OpenKB 1.0
+# Upgrading OpenKB
 
-This guide covers moves from **0.1.0 / pre-release snapshots** to **1.0.0**. There is no automatic migration tool — the on-disk layout is stable.
+## 1.0.0 → 1.1.0
+
+1. **Pull / checkout v1.1.0** and reinstall:
+
+   ```bash
+   uv sync --dev
+   cd web && npm ci && npm run build
+   ```
+
+2. **Restart `openkb serve`** (WebSocket + UI bundle).
+
+3. **Optional — portable dogfood path:** The bundled `openkb` project may use `repo_path: .` (relative to `OPENKB_ROOT`). Existing projects with absolute paths still work.
+
+4. **Playwright (contributors):** Browsers default to `.playwright-browsers/` at repo root — set `PLAYWRIGHT_BROWSERS_PATH` to keep off system drive.
+
+5. **No database migration** — workspace layout unchanged.
+
+See [CHANGELOG.md](CHANGELOG.md#110---2026-05-21) for UI and docs additions.
+
+---
+
+## Upgrading to OpenKB 1.0
+
+This section covers moves from **0.1.0 / pre-release snapshots** to **1.0.0**. There is no automatic migration tool — the on-disk layout is stable.
 
 ## Workspace layout (unchanged)
 

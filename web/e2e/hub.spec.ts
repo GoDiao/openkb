@@ -31,17 +31,18 @@ test.describe("Hub basics", () => {
     await page.goto(`/projects/${E2E_SANDBOX_SLUG}/kanban`);
     await page.waitForSelector('[data-testid="kanban-column-todo"]', { timeout: 15_000 });
 
-    const themeBtn = page.getByRole("button", { name: /Dawn|Dusk|浅色|深色/i });
+    const themeBtn = page.getByRole("button", { name: /Choose theme|选择主题/i });
     await themeBtn.click();
+    await page.getByRole("option", { name: /Ocean|海蓝/i }).click();
 
     const theme = await page.evaluate(() => document.documentElement.dataset.theme);
-    expect(theme).toBeTruthy();
+    expect(theme).toBe("ocean");
 
     await page.reload();
     await page.waitForSelector('[data-testid="kanban-column-todo"]');
 
     const themeAfter = await page.evaluate(() => document.documentElement.dataset.theme);
-    expect(themeAfter).toBe(theme);
+    expect(themeAfter).toBe("ocean");
   });
 
   test("kanban drag moves task between columns", async ({ page }) => {

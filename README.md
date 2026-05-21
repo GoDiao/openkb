@@ -1,10 +1,12 @@
 # OpenKB
 
+**Agents sync progress via CLI. Humans read Spec, Plan, and the roadmap in one Web Hub.**
+
 Centralized **Agent Kanban + project state hub**: coding agents align progress via CLI; humans manage Spec / Plan / decisions in the Web UI.
 
 Data lives under `workspace/projects/{slug}/` — not scattered as `.openkb/` in each business repo.
 
-> **中文文档:** [README.zh-CN.md](README.zh-CN.md) · **License:** [MIT](LICENSE)
+> **Why OpenKB?** [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md) · **中文:** [README.zh-CN.md](README.zh-CN.md) · **License:** [MIT](LICENSE) · **v1.1.0**
 
 ---
 
@@ -98,7 +100,7 @@ docker compose up --build
 # → http://127.0.0.1:8788  (persist workspace/ via volume)
 ```
 
-See [UPGRADE.md](UPGRADE.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+See [UPGRADE.md](UPGRADE.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · [docs/DEMO.md](docs/DEMO.md)
 
 ### 5. Verify
 
@@ -163,9 +165,16 @@ Prefer **`uv run openkb`** on Windows (UTF-8 safe). Legacy probe files on `openk
 
 ---
 
-## Security
+## Security ⚠️
 
-OpenKB 1.0 has **no authentication**. Use on **localhost or a trusted private network** only. Do not expose port 8788 to the public internet without a proxy and auth. Details: [SECURITY.md](SECURITY.md).
+OpenKB **1.x has no authentication**. Intended for **localhost or a trusted private network only**.
+
+| ✅ Safe | ❌ Do not |
+|---------|-----------|
+| `127.0.0.1` on your machine | Bind `0.0.0.0:8788` on a public VPS without TLS + auth |
+| LAN / VPN / private Docker | Market as multi-tenant SaaS without building auth (v2) |
+
+Details: [SECURITY.md](SECURITY.md) · Narrative: [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md)
 
 ---
 

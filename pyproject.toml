@@ -1,6 +1,6 @@
 [project]
 name = "openkb"
-version = "1.0.0"
+version = "1.1.0"
 description = "Centralized Agent Kanban platform"
 readme = "README.md"
 license = { text = "MIT" }
@@ -21,6 +21,13 @@ dev = ["pytest>=8.3.0", "pytest-asyncio>=0.24.0"]
 [project.scripts]
 openkb = "openkb.cli.main:app"
 
+[project.urls]
+Homepage = "https://github.com/GoDiao/openkb"
+Repository = "https://github.com/GoDiao/openkb"
+Documentation = "https://github.com/GoDiao/openkb/blob/master/README.md"
+Changelog = "https://github.com/GoDiao/openkb/blob/master/CHANGELOG.md"
+Issues = "https://github.com/GoDiao/openkb/issues"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -33,4 +40,4 @@ testpaths = ["tests"]
 pythonpath = ["server/src"]
 
 [tool.uv]
-cache-dir = "E:/AProject/TianX/Personal/OpenKB/.uv-cache"
+# Prefer UV_CACHE_DIR env; default cache is .uv-cache under OPENKB_ROOT

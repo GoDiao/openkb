@@ -71,9 +71,9 @@ export function KanbanBoard({ board, onMove, onTaskClick }: Props) {
           />
         ))}
       </div>
-      <DragOverlay dropAnimation={{ duration: 200, easing: "ease-out" }}>
+      <DragOverlay dropAnimation={{ duration: 220, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}>
         {activeTask ? (
-          <div className="w-[280px] rotate-2 opacity-95">
+          <div className="w-[292px] rotate-[1.5deg] scale-[1.02] opacity-95 shadow-[var(--shadow-card-hover)]">
             <TaskCard task={activeTask} onClick={() => {}} isDragging />
           </div>
         ) : null}

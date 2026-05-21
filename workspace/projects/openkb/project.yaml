@@ -1,6 +1,6 @@
 slug: openkb
 name: OpenKB
-repo_path: E:/AProject/TianX/Personal/OpenKB
+repo_path: .
 description: Agent 中心化 Kanban 与进度对齐平台
 status: active
 default_branch: main

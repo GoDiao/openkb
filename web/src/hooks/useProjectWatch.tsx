@@ -1,49 +1,115 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useI18n } from "../i18n/I18nProvider";
+import { useToast } from "../components/ui/ToastProvider";
 import { useInvalidateProjectSync } from "./useInvalidateProjectSync";
+import { type WatchStatus, watchWebSocketUrl } from "./watchTypes";
 
-const WatchContext = createContext(false);
+type WatchContextValue = {
+  status: WatchStatus;
+};
 
+const WatchContext = createContext<WatchContextValue>({ status: "idle" });
+
+export function useWatchStatus() {
+  return useContext(WatchContext).status;
+}
+
+export type { WatchStatus } from "./watchTypes";
+
+/** @deprecated use useWatchStatus() === "connected" */
 export function useWatchConnected() {
-  return useContext(WatchContext);
+  return useWatchStatus() === "connected";
 }
 
-function watchWebSocketUrl(slug: string) {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/api/projects/${slug}/watch`;
-}
-
-function useProjectWatchInner(slug: string) {
+function useProjectWatchInner(slug: string): WatchStatus {
+  const { t } = useI18n();
+  const { pushToast } = useToast();
   const invalidate = useInvalidateProjectSync(slug);
   const invalidateRef = useRef(invalidate);
-  const [connected, setConnected] = useState(false);
+  const pushToastRef = useRef(pushToast);
+  const tRef = useRef(t);
+  const pendingKinds = useRef<Set<string>>(new Set());
+  const toastTimer = useRef<number | undefined>(undefined);
+  const hadConnection = useRef(false);
+  const [status, setStatus] = useState<WatchStatus>("idle");
 
   useEffect(() => {
     invalidateRef.current = invalidate;
   }, [invalidate]);
 
   useEffect(() => {
-    if (!slug) return undefined;
+    pushToastRef.current = pushToast;
+    tRef.current = t;
+  }, [pushToast, t]);
+
+  useEffect(() => {
+    if (!slug) {
+      setStatus("idle");
+      return undefined;
+    }
 
     let active = true;
     let socket: WebSocket | null = null;
     let retryTimer: number | undefined;
 
+    const flushToast = () => {
+      const kinds = [...pendingKinds.current];
+      pendingKinds.current.clear();
+      if (kinds.length === 0) return;
+
+      let message: string;
+      if (kinds.length === 1) {
+        const kind = kinds[0];
+        if (kind === "board") message = tRef.current("watch.toastBoard");
+        else if (kind === "state") message = tRef.current("watch.toastState");
+        else if (kind === "roadmap") message = tRef.current("watch.toastRoadmap");
+        else message = tRef.current("watch.toastSync");
+      } else {
+        message = tRef.current("watch.toastSync");
+      }
+      pushToastRef.current(message, "sync");
+    };
+
+    const queueToast = (kinds: string[]) => {
+      for (const kind of kinds) pendingKinds.current.add(kind);
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+      toastTimer.current = window.setTimeout(flushToast, 450);
+    };
+
     const connect = () => {
       if (!active) return;
+      setStatus(hadConnection.current ? "reconnecting" : "connecting");
       socket = new WebSocket(watchWebSocketUrl(slug));
 
       socket.onopen = () => {
         if (!active) return;
-        setConnected(true);
+        if (hadConnection.current) {
+          pushToastRef.current(tRef.current("watch.toastReconnected"), "info");
+        }
+        hadConnection.current = true;
+        setStatus("connected");
       };
 
-      socket.onmessage = () => {
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(String(event.data)) as { kinds?: string[] };
+          if (Array.isArray(data.kinds) && data.kinds.length > 0) {
+            queueToast(data.kinds);
+          }
+        } catch {
+          queueToast(["board", "state", "roadmap"]);
+        }
         invalidateRef.current();
       };
 
       socket.onclose = () => {
         if (!active) return;
-        setConnected(false);
+        if (hadConnection.current) {
+          setStatus("reconnecting");
+          pushToastRef.current(tRef.current("watch.toastReconnecting"), "info");
+        } else {
+          setStatus("connecting");
+        }
         retryTimer = window.setTimeout(connect, 3000);
       };
 
@@ -56,17 +122,19 @@ function useProjectWatchInner(slug: string) {
 
     return () => {
       active = false;
+      hadConnection.current = false;
       if (retryTimer) window.clearTimeout(retryTimer);
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
       socket?.close();
-      setConnected(false);
+      setStatus("idle");
     };
   }, [slug]);
 
-  return connected;
+  return status;
 }
 
 export function ProjectWatchProvider({ slug, children }: { slug: string; children: ReactNode }) {
-  const connected = useProjectWatchInner(slug);
-  const value = useMemo(() => connected, [connected]);
+  const status = useProjectWatchInner(slug);
+  const value = useMemo(() => ({ status }), [status]);
   return <WatchContext.Provider value={value}>{children}</WatchContext.Provider>;
 }

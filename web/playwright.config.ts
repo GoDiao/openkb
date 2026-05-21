@@ -5,6 +5,10 @@ const ROOT = path.resolve("..");
 const WEB_PORT = 5175;
 const API_PORT = 8788;
 const cacheDir = process.env.UV_CACHE_DIR ?? path.join(ROOT, ".uv-cache");
+const playwrightBrowsersPath =
+  process.env.PLAYWRIGHT_BROWSERS_PATH ?? path.join(ROOT, ".playwright-browsers");
+
+process.env.PLAYWRIGHT_BROWSERS_PATH = playwrightBrowsersPath;
 
 export default defineConfig({
   testDir: "./e2e",

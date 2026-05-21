@@ -1,10 +1,17 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { CopyCodeBlock } from "../components/ui/CopyButton";
 import { useI18n } from "../i18n/I18nProvider";
 
 const PAGE_KEYS = ["overview", "kanban", "spec", "plan", "graph", "decisions"] as const;
 const WORKFLOW_KEYS = ["new", "onboard", "sync", "start"] as const;
 const KANBAN_DRAG_ROWS = ["column", "state", "session", "lock", "roadmap"] as const;
+
+const SETUP_COMMANDS = {
+  install: "uv run openkb agent install",
+  serve: "uv run openkb serve",
+  context: "openkb context --json",
+} as const;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -17,6 +24,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export function HelpPage() {
   const { t } = useI18n();
+  const adrExample = t("help.adrPhases.example").replace(/\\n/g, "\n");
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -39,9 +47,7 @@ export function HelpPage() {
               transition={{ delay: i * 0.04 }}
               className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-base)] px-4 py-3"
             >
-              <p className="m-0 font-medium text-[var(--accent)]">
-                {t(`help.pages.${key}.title`)}
-              </p>
+              <p className="m-0 font-medium text-[var(--accent)]">{t(`help.pages.${key}.title`)}</p>
               <p className="m-0 mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
                 {t(`help.pages.${key}.desc`)}
               </p>
@@ -84,21 +90,15 @@ export function HelpPage() {
               <h3 className="font-display m-0 text-base font-semibold">{t(`help.workflows.${key}.title`)}</h3>
               <dl className="m-0 mt-3 grid gap-2 text-sm">
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
-                    {t("help.labels.when")}
-                  </dt>
+                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{t("help.labels.when")}</dt>
                   <dd className="m-0 mt-0.5 text-[var(--text-primary)]">{t(`help.workflows.${key}.when`)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
-                    {t("help.labels.agent")}
-                  </dt>
+                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{t("help.labels.agent")}</dt>
                   <dd className="m-0 mt-0.5 text-[var(--text-primary)]">{t(`help.workflows.${key}.agent`)}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
-                    {t("help.labels.you")}
-                  </dt>
+                  <dt className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{t("help.labels.you")}</dt>
                   <dd className="m-0 mt-0.5 text-[var(--text-primary)]">{t(`help.workflows.${key}.you`)}</dd>
                 </div>
               </dl>
@@ -109,9 +109,7 @@ export function HelpPage() {
 
       <Section title={t("help.adrPhases.title")}>
         <p className="m-0 leading-relaxed text-[var(--text-primary)]">{t("help.adrPhases.body")}</p>
-        <pre className="mt-4 overflow-x-auto rounded-[var(--radius-card)] bg-[var(--bg-base)] p-3 text-xs text-[var(--accent)]">
-          {t("help.adrPhases.example").replace(/\\n/g, "\n")}
-        </pre>
+        <CopyCodeBlock code={adrExample} className="mt-4" />
         <p className="m-0 mt-3 text-sm text-[var(--text-muted)]">{t("help.adrPhases.hint")}</p>
       </Section>
 
@@ -169,10 +167,19 @@ export function HelpPage() {
       </Section>
 
       <Section title={t("help.setup.title")}>
-        <ul className="m-0 space-y-3 p-0 text-sm leading-relaxed text-[var(--text-primary)]">
-          <li>{t("help.setup.patch")}</li>
-          <li>{t("help.setup.cli")}</li>
-        </ul>
+        <div className="space-y-4">
+          <div>
+            <p className="m-0 text-sm leading-relaxed text-[var(--text-primary)]">{t("help.setup.patch")}</p>
+            <CopyCodeBlock code={SETUP_COMMANDS.install} className="mt-3" />
+          </div>
+          <div>
+            <p className="m-0 text-sm leading-relaxed text-[var(--text-primary)]">{t("help.setup.cli")}</p>
+            <div className="mt-3 space-y-2">
+              <CopyCodeBlock code={SETUP_COMMANDS.serve} />
+              <CopyCodeBlock code={SETUP_COMMANDS.context} />
+            </div>
+          </div>
+        </div>
       </Section>
 
       <p className="text-center text-sm">

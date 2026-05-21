@@ -337,10 +337,19 @@ Hub **WebSocket V2** (`/api/projects/{slug}/watch`) pushes board/state/roadmap u
 
 ---
 
-## 10. Example: Hermes Agent / YONOH
+## 10. Example: dogfood project `openkb`
 
-- slug: `hermes-agent-yonoh`  
-- repo_path: `E:/AProject/TianX/Personal/hermes-agent`  
-- Spec: `hermes-agent/docs/spec.md`  
-- Plan: `hermes-agent/docs/plan.md`  
-- Verify: `openkb.cmd doc verify --project hermes-agent-yonoh --json`
+After clone, the bundled demo project uses a **portable** repo path:
+
+- slug: `openkb`
+- repo_path: `.` (resolved relative to `OPENKB_ROOT`)
+- Spec: `docs/superpowers/specs/2026-05-20-openkb-design.md`
+- Plan: `docs/superpowers/plans/2026-05-20-openkb.md`
+- Verify: `uv run openkb doc verify --project openkb --json`
+
+For your own app:
+
+```bash
+uv run openkb project create --slug my-app --name "My App" \
+  --repo-path /path/to/my-app --link --json
+```

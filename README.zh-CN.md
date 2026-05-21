@@ -1,10 +1,12 @@
 # OpenKB
 
-Centralized **Agent Kanban + project state hub**: coding agents align progress via CLI; humans manage Spec / Plan / decisions in the Web UI.
+**Agent 用 CLI 对齐进度，人类在 Web Hub 阅读 Spec / Plan / 路线图。**
 
-Data lives under `workspace/projects/{slug}/` — not scattered as `.openkb/` in each business repo.
+Centralized **Agent Kanban + project state hub**：Coding Agent 通过 CLI 对齐进度；人类在 Web UI 管理 Spec / Plan / 决策。
 
-> **中文文档:** [README.zh-CN.md](README.zh-CN.md)
+数据在 `workspace/projects/{slug}/`，而不是在每个业务仓库里散落 `.openkb/`。
+
+> **为什么选 OpenKB？** [docs/WHY_OPENKB.zh-CN.md](docs/WHY_OPENKB.zh-CN.md) · **English:** [README.md](README.md)
 
 ---
 
@@ -149,9 +151,16 @@ Windows 推荐 **`uv run openkb`**（UTF-8 安全）。
 
 ---
 
-## 安全说明
+## 安全说明 ⚠️
 
-1.0 **无登录鉴权**，仅适合 **本机或可信内网**。勿将 8788 端口直接暴露公网。见 [SECURITY.md](SECURITY.md)。
+OpenKB **1.x 无登录鉴权**，仅适合 **本机或可信内网**。
+
+| ✅ 可以 | ❌ 不要 |
+|--------|--------|
+| 本机 `127.0.0.1` | 在公网 VPS 上裸奔 `0.0.0.0:8788` |
+| 局域网 / VPN / 私有 Docker | 无鉴权情况下当 SaaS 宣传 |
+
+见 [SECURITY.md](SECURITY.md) · [docs/WHY_OPENKB.zh-CN.md](docs/WHY_OPENKB.zh-CN.md)
 
 ---
 

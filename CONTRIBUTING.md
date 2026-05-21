@@ -12,7 +12,7 @@ uv run pytest
 cd web && npm run test:e2e
 ```
 
-See [README.md](README.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+See [README.md](README.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Product narrative: [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md).
 
 ## Pull requests
 

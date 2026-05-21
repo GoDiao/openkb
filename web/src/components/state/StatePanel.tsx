@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useI18n } from "../../i18n/I18nProvider";
-import { DocSkeleton } from "../ui/Skeleton";
-import { usePatchState, useProjectState } from "../../hooks/useState";
-import { isBlockerActive } from "../../utils/labels";
+import { StatePanelSkeleton } from "../ui/KanbanSkeleton";
+import { usePatchState, useProjectState } from "../../hooks/useState";import { isBlockerActive } from "../../utils/labels";
 import { NextItemsEditor } from "./NextItemsEditor";
 
 type Props = {
@@ -35,9 +35,9 @@ export function StatePanel({ slug, variant = "sidebar" }: Props) {
 
   if (isLoading) {
     return (
-      <div className={shellClass}>
-        <DocSkeleton />
-      </div>
+      <aside className={shellClass}>
+        <StatePanelSkeleton />
+      </aside>
     );
   }
 
@@ -118,15 +118,28 @@ export function StatePanel({ slug, variant = "sidebar" }: Props) {
               {recentOpen ? "▾" : "▸"} ({state.recent_done.length})
             </span>
           </button>
-          {recentOpen && (
-            <ul className="mb-0 mt-2 space-y-1.5 p-0">
-              {state.recent_done.map((item) => (
-                <li key={item} className="text-sm text-[var(--text-muted)]">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          )}
+          <AnimatePresence initial={false}>
+            {recentOpen && (
+              <motion.ul
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-0 mt-2 space-y-1.5 overflow-hidden p-0"
+              >
+                {state.recent_done.map((item, i) => (
+                  <motion.li
+                    key={item}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                    className="text-sm text-[var(--text-muted)]"
+                  >
+                    {item}
+                  </motion.li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </section>
       )}
 

@@ -8,6 +8,7 @@ import yaml
 
 from openkb.config import OpenKBConfig
 from openkb.errors import ProjectNotFoundError
+from openkb.path_utils import resolve_repo_path
 
 
 def _normalize_path(path: Path) -> Path:
@@ -50,7 +51,7 @@ def _slug_from_repo_path(cfg: OpenKBConfig, cwd: Path) -> str | None:
         repo = data.get("repo_path")
         if not repo:
             continue
-        repo_path = _normalize_path(Path(repo))
+        repo_path = resolve_repo_path(cfg, str(repo))
         if _paths_equal(resolved_cwd, repo_path) or _is_under(resolved_cwd, repo_path):
             return str(data.get("slug", child.name))
     return None

@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import mermaid from "mermaid";
 import { useI18n } from "../../i18n/I18nProvider";
 import { useTheme } from "../../theme/useTheme";
+import { isThemeDark } from "../../theme/ThemeProvider";
 import { MermaidSkeleton } from "../ui/Skeleton";
 
 type Props = {
@@ -23,7 +24,7 @@ export function MermaidDiagram({ chart, className = "" }: Props) {
     setLoading(true);
     mermaid.initialize({
       startOnLoad: false,
-      theme: theme === "dark" ? "dark" : "default",
+      theme: isThemeDark(theme) ? "dark" : "default",
       securityLevel: "loose",
       flowchart: { curve: "basis", padding: 16 },
     });

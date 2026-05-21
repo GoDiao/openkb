@@ -7,7 +7,7 @@ type Props = {
 export function Skeleton({ className = "" }: Props) {
   return (
     <div
-      className={`animate-pulse rounded-[var(--radius-card)] bg-[var(--border-subtle)] ${className}`}
+      className={`shimmer rounded-[var(--radius-card)] bg-[var(--border-subtle)] ${className}`}
       aria-hidden
     />
   );
@@ -40,12 +40,12 @@ export function DocSkeleton({ kind }: DocSkeletonProps = {}) {
   );
 }
 
-export function MermaidSkeleton() {
+export function MermaidSkeleton({ className = "" }: Props) {
   const { t } = useI18n();
 
   return (
     <div
-      className="flex min-h-[240px] items-center justify-center rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[var(--bg-base)]"
+      className={`flex min-h-[240px] items-center justify-center rounded-[var(--radius-panel)] border border-[var(--border-subtle)] bg-[var(--bg-base)]/60 backdrop-blur-sm ${className}`}
       aria-busy="true"
       aria-label={t("common.rendering")}
     >

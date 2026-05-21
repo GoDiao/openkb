@@ -6,6 +6,7 @@ import yaml
 
 from openkb.config import OpenKBConfig
 from openkb.errors import NotFoundError
+from openkb.path_utils import resolve_repo_path
 from openkb.project_service import read_project
 
 DocKind = str  # "spec" | "plan"
@@ -15,8 +16,9 @@ def resolve_doc_path(cfg: OpenKBConfig, repo_path: str, rel: str) -> Path:
     if not rel:
         raise NotFoundError("Doc path is empty")
     rel_path = Path(rel)
+    base = resolve_repo_path(cfg, repo_path)
     candidates = [
-        Path(repo_path).resolve() / rel_path,
+        base / rel_path,
         cfg.root.resolve() / rel_path,
     ]
     for path in candidates:

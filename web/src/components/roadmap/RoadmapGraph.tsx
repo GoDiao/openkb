@@ -83,50 +83,77 @@ function PhaseNode({
   phase,
   layout,
   selected,
+  hovered,
   dimmed,
   compact,
   onSelect,
+  onHover,
+  onLeave,
 }: {
   phase: EnrichedPhase;
   layout: NodeLayout;
   selected: boolean;
+  hovered?: boolean;
   dimmed?: boolean;
   compact?: boolean;
   onSelect: () => void;
+  onHover: () => void;
+  onLeave: () => void;
 }) {
   const { t } = useI18n();
   const status = phase.status as PhaseStatus;
   const statusLabel = (STATUS_KEYS as readonly string[]).includes(status)
     ? t(`graph.status.${status}`)
     : status;
+  const emphasized = selected || hovered;
 
   return (
     <motion.button
       type="button"
       data-phase-node
       id={`phase-${phase.id}`}
-      initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: dimmed ? 0.35 : 1, scale: 1 }}
-      transition={{ delay: layout.x * 0.001, duration: 0.35 }}
+      initial={{ opacity: 0, scale: 0.88, y: 8 }}
+      animate={{
+        opacity: dimmed ? 0.32 : 1,
+        scale: hovered && !selected ? 1.04 : 1,
+        y: 0,
+      }}
+      transition={{ delay: layout.x * 0.0008, type: "spring", stiffness: 420, damping: 32 }}
       onClick={onSelect}
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+      onFocus={onHover}
+      onBlur={onLeave}
       className="focus-ring absolute text-left"
       style={{ left: layout.x, top: layout.y, width: layout.width, height: layout.height }}
       aria-pressed={selected}
     >
       <div
-        className={`relative flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-200 ${
+        className={`relative flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300 ${
           selected
-            ? "border-[var(--accent)] shadow-[0_0_0_1px_var(--accent),0_8px_32px_rgba(201,168,124,0.18)]"
-            : "border-[var(--border-subtle)] shadow-[var(--shadow-card)] hover:border-[var(--accent)]/50 hover:shadow-[var(--shadow-card-hover)]"
-        } ${status === "active" ? "ring-1 ring-[var(--phase-active)]/30" : ""}`}
+            ? "border-[var(--accent)] shadow-[0_0_0_1px_var(--accent),0_12px_40px_color-mix(in_srgb,var(--accent)_22%,transparent)]"
+            : hovered
+              ? "border-[var(--accent)]/70 shadow-[var(--shadow-card-hover)]"
+              : "border-[var(--border-subtle)] shadow-[var(--shadow-card)]"
+        } ${status === "active" ? "phase-node-active-ring ring-1 ring-[var(--phase-active)]/25" : ""}`}
         style={{
           background: `linear-gradient(145deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)`,
         }}
       >
         <div className="h-1 w-full shrink-0" style={{ background: `var(--phase-${status})` }} />
+        {status === "done" && (
+          <span
+            className="phase-done-badge absolute right-2 top-3 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--phase-done)] text-[9px] font-bold text-[var(--bg-base)]"
+            aria-hidden
+          >
+            ✓
+          </span>
+        )}
         <div className={`flex min-h-0 flex-1 flex-col ${compact ? "px-2.5 py-2" : "px-3.5 py-2.5"}`}>
           <div className="mb-1 flex items-center justify-between gap-1">
-            <span className="font-mono text-[10px] text-[var(--accent)]">{phase.id}</span>
+            <span className={`font-mono text-[10px] ${emphasized ? "text-[var(--accent)]" : "text-[var(--accent)]/80"}`}>
+              {phase.id}
+            </span>
             <span
               className="rounded-full px-1.5 py-px text-[9px] uppercase tracking-wide"
               style={{
@@ -139,7 +166,13 @@ function PhaseNode({
           </div>
           <p
             className={`m-0 flex-1 leading-snug text-[var(--text-primary)] ${
-              compact ? "line-clamp-2 text-[11px]" : "line-clamp-2 text-xs font-medium"
+              compact
+                ? hovered
+                  ? "text-[11px]"
+                  : "line-clamp-2 text-[11px]"
+                : hovered
+                  ? "text-xs font-medium"
+                  : "line-clamp-2 text-xs font-medium"
             }`}
             title={phase.title}
           >
@@ -148,11 +181,13 @@ function PhaseNode({
           {phase.task_details.length > 0 && (
             <div className="mt-1.5 flex items-center gap-1">
               {phase.task_details.slice(0, compact ? 4 : 6).map((task) => (
-                <span
+                <motion.span
                   key={task.id}
                   className="inline-block h-1.5 w-1.5 rounded-full"
                   style={{ background: TASK_DOT[task.status] ?? "var(--phase-pending)" }}
                   title={`${task.id} · ${task.title}`}
+                  animate={hovered ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.35 }}
                 />
               ))}
               {phase.task_details.length > (compact ? 4 : 6) && (
@@ -161,6 +196,17 @@ function PhaseNode({
                 </span>
               )}
             </div>
+          )}
+          {hovered && !selected && (
+            <motion.p
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="m-0 mt-1.5 truncate text-[9px] font-medium text-[var(--accent)]"
+            >
+              {t("graph.clickToOpen")}
+              {phase.task_details.length > 0 &&
+                ` · ${t("graph.taskCount", { count: phase.task_details.length })}`}
+            </motion.p>
           )}
         </div>
       </div>
@@ -353,13 +399,16 @@ export function RoadmapGraph({ slug, phases, phaseDepths, compact, initialSelect
     null;
 
   const [selectedId, setSelectedId] = useState<string | null>(defaultSelected);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const [popoverSize, setPopoverSize] = useState({ w: 0, h: 0 });
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
 
+  const focusId = selectedId ?? hoveredId;
+
   const relatedIds = useMemo(
-    () => (selectedId ? relatedPhaseIds(selectedId, layout.edges) : null),
-    [selectedId, layout.edges],
+    () => (focusId ? relatedPhaseIds(focusId, layout.edges) : null),
+    [focusId, layout.edges],
   );
 
   useEffect(() => {
@@ -487,10 +536,12 @@ export function RoadmapGraph({ slug, phases, phaseDepths, compact, initialSelect
               const a = positions.get(from);
               const b = positions.get(to);
               if (!a || !b) return null;
-              const tone = edgeTone(phasesMap.get(from), phasesMap.get(to), selectedId);
+              const tone = edgeTone(phasesMap.get(from), phasesMap.get(to), focusId);
               const style = EDGE_STROKE[tone];
               const edgeDimmed =
                 relatedIds !== null && !relatedIds.has(from) && !relatedIds.has(to);
+              const edgeHovered =
+                hoveredId !== null && (from === hoveredId || to === hoveredId);
               const marker =
                 tone === "highlight"
                   ? `url(#${markerPrefix}-arrow-highlight)`
@@ -498,14 +549,17 @@ export function RoadmapGraph({ slug, phases, phaseDepths, compact, initialSelect
                     ? `url(#${markerPrefix}-arrow-active)`
                     : `url(#${markerPrefix}-arrow)`;
               return (
-                <path
+                <motion.path
                   key={`${from}-${to}`}
                   d={edgePath(a, b)}
                   fill="none"
                   stroke={style.stroke}
-                  strokeWidth={style.width}
-                  strokeOpacity={edgeDimmed ? 0.12 : style.opacity}
+                  strokeWidth={edgeHovered ? style.width + 0.75 : style.width}
+                  strokeOpacity={edgeDimmed ? 0.12 : edgeHovered ? Math.min(1, style.opacity + 0.2) : style.opacity}
                   markerEnd={edgeDimmed ? undefined : marker}
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
                 />
               );
             })}
@@ -520,9 +574,12 @@ export function RoadmapGraph({ slug, phases, phaseDepths, compact, initialSelect
                 phase={phase}
                 layout={node}
                 selected={selectedId === node.id}
+                hovered={hoveredId === node.id}
                 dimmed={relatedIds !== null && !relatedIds.has(node.id)}
                 compact={compact}
                 onSelect={() => setSelectedId(node.id)}
+                onHover={() => setHoveredId(node.id)}
+                onLeave={() => setHoveredId(null)}
               />
             );
           })}

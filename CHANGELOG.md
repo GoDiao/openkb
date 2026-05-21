@@ -4,6 +4,48 @@ All notable changes to OpenKB are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-05-21
+
+Hub UX polish, accessibility, performance, and open-source release hygiene.
+
+### Added
+
+- **Hub UX:** Design system refresh (8 themes, glass header, page transitions, skeleton loaders)
+- **Onboarding:** Hub hero demo, checklist animations, copy-to-clipboard for CLI commands
+- **Docs reader:** Spec/Plan TOC, scroll spy, read progress bar, mobile TOC drawer
+- **Roadmap:** Hover highlights, done/active animations, lazy-loaded graph on Overview
+- **Overview:** Animated progress ring, board bar chart, count-up metrics
+- **Kanban:** Column empty states, drag polish, save feedback in task sidebar
+- **Shortcuts:** Vim-style `g` + letter navigation, `Ctrl+/` help modal, Tab hover hints
+- **Live sync UI:** Connection status badge, reconnect toasts, WebSocket status context
+- **E2E:** `web/e2e/polish.spec.ts` (shortcuts, watch badge, overview charts)
+- **Demo tooling:** `npm run demo:capture`, [docs/DEMO.md](docs/DEMO.md)
+- **Open source docs:** [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md), [docs/PUBLISHING.md](docs/PUBLISHING.md)
+- **Community:** GitHub issue/PR templates, [GOOD_FIRST_ISSUES.md](.github/GOOD_FIRST_ISSUES.md)
+- **Portable dogfood:** `repo_path: .` with relative path resolution (`path_utils`)
+
+### Changed
+
+- **Performance:** Code-split `RoadmapGraph` and `MermaidDiagram`; Overview roadmap lazy-mounts on scroll
+- **Themes:** Chart tokens (`--chart-*`) with per-theme contrast tuning
+- **Project nav:** Single watch-status badge; `aria-keyshortcuts` on tabs
+- **Playwright browsers:** Default cache under `.playwright-browsers/` at repo root (configurable)
+
+### Security
+
+- Expanded [SECURITY.md](SECURITY.md) with public messaging — **no auth in v1.x**; do not expose `:8788` to the internet
+
+### Upgrade from 1.0.0
+
+```bash
+git pull
+uv sync --dev
+cd web && npm ci && npm run build
+# Restart openkb serve
+```
+
+If your dogfood `project.yaml` used an absolute `repo_path`, you may switch to `.` (relative to `OPENKB_ROOT`).
+
 ## [1.0.0] - 2026-05-20
 
 First release aimed at **single-user / trusted-network** Agent project hubs.
@@ -26,7 +68,7 @@ First release aimed at **single-user / trusted-network** Agent project hubs.
 - Production Docker image (`Dockerfile`, `docker-compose.yml`)
 - `SECURITY.md`, `UPGRADE.md`, CI workflow
 
-### Known limitations (v1.0)
+### Known limitations (v1.x)
 
 - **No authentication** — intended for localhost or private networks only
 - **Kanban drag ≠ `openkb done`** — UI drag moves cards only; agents must use CLI to update STATE/session/roadmap
@@ -35,11 +77,12 @@ First release aimed at **single-user / trusted-network** Agent project hubs.
 ### Windows notes
 
 - Prefer **`uv run openkb`** (works cross-platform; avoids PowerShell-only scripts)
-- Set **`UV_CACHE_DIR`** and **`PLAYWRIGHT_BROWSERS_PATH`** on a non-system drive if C: is tight (e.g. `E:\uv-cache`, `E:\playwright-browsers`)
+- Set **`UV_CACHE_DIR`** and **`PLAYWRIGHT_BROWSERS_PATH`** on a non-system drive if C: is tight
 - CLI UTF-8 output fixed for GBK consoles (`cli_echo` + `ensure_stdio_utf8`)
 
 ### Upgrade
 
 See [UPGRADE.md](UPGRADE.md) if you used pre-1.0 snapshots or 0.1.0 installs.
 
+[1.1.0]: https://github.com/GoDiao/openkb/releases/tag/v1.1.0
 [1.0.0]: https://github.com/GoDiao/openkb/releases/tag/v1.0.0

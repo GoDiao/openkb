@@ -1,6 +1,31 @@
 :root {
-  --radius-card: 12px;
-  --radius-panel: 20px;
+  --radius-sm: 8px;
+  --radius-card: 14px;
+  --radius-panel: 22px;
+  --radius-pill: 999px;
+
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 280ms;
+  --duration-slow: 420ms;
+
+  --spring-snappy: 420 34;
+  --spring-gentle: 320 28;
+
+  /* Overview chart tokens — themes may override for contrast */
+  --chart-ring: var(--accent);
+  --chart-ring-track: color-mix(in srgb, var(--border-subtle) 75%, transparent);
+  --chart-ring-glow: color-mix(in srgb, var(--accent) 38%, transparent);
+  --chart-bar-track: var(--bg-base);
+  --chart-bar-backlog: color-mix(in srgb, var(--text-muted) 88%, var(--bg-elevated));
+  --chart-bar-todo: var(--phase-pending);
+  --chart-bar-doing: var(--phase-active);
+  --chart-bar-review: var(--accent);
+  --chart-bar-done: var(--phase-done);
+  --chart-phase-pending: color-mix(in srgb, var(--border-subtle) 55%, var(--text-muted));
 }

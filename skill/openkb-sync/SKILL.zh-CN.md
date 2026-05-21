@@ -336,11 +336,20 @@ openkb.cmd task delete <id> --json          # 仅 backlog/todo/doing/review；do
 
 ---
 
-## 10. 示例 Hermes Agent / YONOH
+## 10. 示例：内置 dogfood 项目 `openkb`
 
-- slug: `hermes-agent-yonoh`  
-- repo_path: `E:/AProject/TianX/Personal/hermes-agent`  
-- Spec: `hermes-agent/docs/spec.md`  
-- Plan: `hermes-agent/docs/plan.md`  
-- 验证: `openkb.cmd doc verify --project hermes-agent-yonoh --json`
+克隆后，演示项目使用**可移植**路径：
+
+- slug: `openkb`
+- repo_path: `.`（相对 `OPENKB_ROOT` 解析）
+- Spec: `docs/superpowers/specs/2026-05-20-openkb-design.md`
+- Plan: `docs/superpowers/plans/2026-05-20-openkb.md`
+- 验证: `uv run openkb doc verify --project openkb --json`
+
+自有项目：
+
+```bash
+uv run openkb project create --slug my-app --name "My App" \
+  --repo-path /path/to/my-app --link --json
+```
 
