@@ -39,7 +39,7 @@ Hub UX polish, accessibility, performance, and open-source release hygiene.
 
 ```bash
 git pull
-uv sync --dev
+uv sync --extra dev
 cd web && npm ci && npm run build
 # Restart openkb serve
 ```

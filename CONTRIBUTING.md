@@ -5,7 +5,7 @@ Thanks for improving OpenKB. This project is maintained as a **single-user / tru
 ## Development setup
 
 ```bash
-uv sync --dev
+uv sync --extra dev
 cd web && npm ci && npm run build
 export OPENKB_ROOT="$(pwd)/.."
 uv run pytest

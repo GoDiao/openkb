@@ -26,7 +26,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Install Python dependencies
-        run: uv sync --dev
+        run: uv sync --extra dev
 
       - name: pytest
         run: uv run pytest
@@ -58,7 +58,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --dev
+          uv sync --extra dev
           cd web && npm ci
 
       - name: Install Playwright Chromium

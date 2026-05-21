@@ -8,6 +8,17 @@ Centralized **Agent Kanban + project state hub**：Coding Agent 通过 CLI 对�
 
 > **为什么选 OpenKB？** [docs/WHY_OPENKB.zh-CN.md](docs/WHY_OPENKB.zh-CN.md) · **English:** [README.md](README.md)
 
+<p align="center">
+  <img src="docs/assets/demo/01-hub-projects.png" alt="项目 Hub" width="720" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/demo/02-overview.png" alt="Overview 仪表盘" width="360" />
+  <img src="docs/assets/demo/03-kanban.png" alt="Kanban 看板" width="360" />
+</p>
+
+> 自行录制演示：[docs/DEMO.md](docs/DEMO.md) · `cd web && npm run demo:capture`
+
 ---
 
 ## Installation (cross-platform)
@@ -20,7 +31,7 @@ Run commands from the **OpenKB root**. Prefer `uv run openkb` (no Windows-only s
 cd /path/to/OpenKB
 export UV_CACHE_DIR="${UV_CACHE_DIR:-$HOME/.cache/uv}"   # optional
 
-uv sync --dev
+uv sync --extra dev
 
 cd web
 npm install

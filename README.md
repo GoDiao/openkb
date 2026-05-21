@@ -8,6 +8,17 @@ Data lives under `workspace/projects/{slug}/` — not scattered as `.openkb/` in
 
 > **Why OpenKB?** [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md) · **中文:** [README.zh-CN.md](README.zh-CN.md) · **License:** [MIT](LICENSE) · **v1.1.0**
 
+<p align="center">
+  <img src="docs/assets/demo/01-hub-projects.png" alt="Project hub" width="720" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/demo/02-overview.png" alt="Overview dashboard" width="360" />
+  <img src="docs/assets/demo/03-kanban.png" alt="Kanban board" width="360" />
+</p>
+
+> Record your own demo: [docs/DEMO.md](docs/DEMO.md) · `cd web && npm run demo:capture`
+
 ---
 
 ## Installation (cross-platform)
@@ -20,7 +31,7 @@ Run commands from the **OpenKB root**. Prefer `uv run openkb` (no Windows-only s
 cd /path/to/OpenKB
 export UV_CACHE_DIR="${UV_CACHE_DIR:-$HOME/.cache/uv}"   # optional
 
-uv sync --dev
+uv sync --extra dev
 
 cd web
 npm install
