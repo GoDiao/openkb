@@ -1,0 +1,30 @@
+patch:
+  id: openkb-onboarding
+  version: 1
+  body_file: patches/openkb-onboarding.v1.md
+
+targets:
+  - id: cursor-agents
+    label: Cursor · User AGENTS.md
+    path: ~/.cursor/AGENTS.md
+  - id: cursor-claude
+    label: Cursor · User CLAUDE.md
+    path: ~/.cursor/CLAUDE.md
+  - id: claude-code
+    label: Claude Code · CLAUDE.md
+    path: ~/.claude/CLAUDE.md
+  - id: claude-code-local
+    label: Claude Code · CLAUDE.local.md
+    path: ~/.claude/CLAUDE.local.md
+  - id: codex-agents
+    label: Codex · AGENTS.md
+    path: ~/.codex/AGENTS.md
+  - id: codex-config-agents
+    label: Codex · Config AGENTS.md
+    path: ~/.config/codex/AGENTS.md
+  - id: home-agents
+    label: Home · ~/AGENTS.md
+    path: ~/AGENTS.md
+  - id: home-claude
+    label: Home · ~/CLAUDE.md
+    path: ~/CLAUDE.md

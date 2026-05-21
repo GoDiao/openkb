@@ -14,6 +14,28 @@ def priority_rank(p: Priority) -> int:
     return _PRIORITY[p]
 
 
+class ProjectDocs(BaseModel):
+    spec: str = ""
+    plan: str = ""
+
+
+PhaseStatus = Literal["done", "active", "pending", "blocked"]
+
+
+class RoadmapPhase(BaseModel):
+    id: str
+    title: str
+    status: PhaseStatus = "pending"
+    depends_on: list[str] = Field(default_factory=list)
+    plan_ref: str = ""
+    tasks: list[str] = Field(default_factory=list)
+    decisions: list[str] = Field(default_factory=list)
+
+
+class RoadmapModel(BaseModel):
+    phases: list[RoadmapPhase] = Field(default_factory=list)
+
+
 class ProjectModel(BaseModel):
     slug: str
     name: str
@@ -23,6 +45,7 @@ class ProjectModel(BaseModel):
     default_branch: str = "main"
     lock_ttl_hours: int = 4
     created: str
+    docs: ProjectDocs = Field(default_factory=ProjectDocs)
 
 
 class TaskModel(BaseModel):

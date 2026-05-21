@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from pathlib import Path
 
 from openkb.models import StateModel, StateNow
@@ -137,3 +138,28 @@ def write_state(path: Path, state: StateModel, project_slug: str) -> None:
 """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+    from openkb.watch_service import notify_project_change
+
+    notify_project_change(project_slug, ["state"])
+
+
+def patch_state_fields(
+    state: StateModel,
+    *,
+    summary: str | None = None,
+    next_items: list[str] | None = None,
+    watch_out: list[str] | None = None,
+    blocker: str | None = None,
+    agent_id: str,
+) -> StateModel:
+    if summary is not None:
+        state.summary = summary
+    if next_items is not None:
+        state.next_items = next_items
+    if watch_out is not None:
+        state.watch_out = watch_out
+    if blocker is not None:
+        state.now.blocker = blocker
+    state.last_updated = datetime.now().strftime("%Y-%m-%d %H:%M")
+    state.updated_by = agent_id
+    return state

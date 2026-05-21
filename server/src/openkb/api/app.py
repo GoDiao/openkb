@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from openkb.api.routes import board, projects, state, tasks
+from openkb.api.routes import board, docs, projects, roadmap, state, tasks, watch
 from openkb.errors import LockConflictError, NotFoundError, OpenKBError, ProjectNotFoundError
 
 
@@ -46,6 +46,9 @@ def create_app() -> FastAPI:
     app.include_router(board.router, prefix="/api")
     app.include_router(state.router, prefix="/api")
     app.include_router(tasks.router, prefix="/api")
+    app.include_router(docs.router, prefix="/api")
+    app.include_router(roadmap.router, prefix="/api")
+    app.include_router(watch.router, prefix="/api")
 
     dist = Path(__file__).resolve().parents[4] / "web" / "dist"
     if dist.is_dir():

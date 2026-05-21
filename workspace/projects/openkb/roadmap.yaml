@@ -1,0 +1,138 @@
+phases:
+- id: p0
+  title: 'Phase 0: Repository Foundation'
+  status: done
+  depends_on: []
+  plan_ref: Phase 0
+  tasks: []
+  decisions: []
+- id: p1
+  title: 'Phase 1: Models & Markdown I/O'
+  status: done
+  depends_on:
+  - p0
+  plan_ref: Phase 1
+  tasks: []
+  decisions: []
+- id: p2
+  title: 'Phase 2: Project & Task Services'
+  status: done
+  depends_on:
+  - p1
+  plan_ref: Phase 2
+  tasks: []
+  decisions: []
+- id: p3
+  title: 'Phase 3: CLI'
+  status: done
+  depends_on:
+  - p2
+  plan_ref: Phase 3
+  tasks: []
+  decisions: []
+- id: p4
+  title: 'Phase 4: REST API'
+  status: done
+  depends_on:
+  - p3
+  plan_ref: Phase 4
+  tasks: []
+  decisions: []
+- id: p5
+  title: 'Phase 5: Web UI'
+  status: done
+  depends_on:
+  - p4
+  plan_ref: Phase 5
+  tasks:
+  - '002'
+  decisions: []
+- id: p5b
+  title: 'Phase 5b: Project Hub'
+  status: done
+  depends_on:
+  - p5
+  plan_ref: Phase 5
+  tasks:
+  - '003'
+  decisions: []
+- id: p6
+  title: 'Phase 6: Agent Skill & README'
+  status: done
+  depends_on:
+  - p5b
+  plan_ref: Phase 6
+  tasks:
+  - '004'
+  decisions: []
+- id: p5c
+  title: 'Phase 5c: Web UI UX 打磨'
+  status: done
+  depends_on:
+  - p6
+  plan_ref: Phase 5c
+  tasks:
+  - '006'
+  - '007'
+  - 008
+  - 009
+  - '010'
+  - '011'
+  - '012'
+  decisions:
+  - D005
+- id: p7
+  title: 'Phase 7: E2E & ADR (P0)'
+  status: done
+  depends_on:
+  - p5c
+  plan_ref: Phase 7
+  tasks:
+  - '013'
+  - '014'
+  - '015'
+  - '016'
+  - '017'
+  decisions:
+  - D002
+  - D006
+- id: p8
+  title: 'Phase 8: Multi-Agent Sync (P1)'
+  status: done
+  depends_on:
+  - p7
+  plan_ref: Phase 8
+  tasks:
+  - 018
+  - 019
+  decisions: []
+- id: p9
+  title: 'Phase 9: Docs & Hub Search (P1–P2)'
+  status: done
+  depends_on:
+  - p8
+  plan_ref: Phase 9
+  tasks:
+  - '020'
+  - '021'
+  decisions: []
+- id: p10
+  title: 'Phase 10: Graph Polish (P2)'
+  status: done
+  depends_on:
+  - p9
+  plan_ref: Phase 10
+  tasks:
+  - '022'
+  - '023'
+  decisions: []
+- id: p11
+  title: 'Phase 11: Onboarding & Traceability (P3)'
+  status: done
+  depends_on:
+  - p10
+  plan_ref: Phase 11
+  tasks:
+  - '024'
+  - '025'
+  decisions: []

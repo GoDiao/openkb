@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from openkb.config import OpenKBConfig
-from openkb.errors import LockConflictError, NotFoundError
+from openkb.errors import DeleteForbiddenError, LockConflictError, NotFoundError
 from openkb.markdown_io import read_task_file, write_task_file
 from openkb.models import (
     BoardColumn,
@@ -16,8 +17,10 @@ from openkb.models import (
     priority_rank,
 )
 from openkb.project_service import BOARD_COLUMNS, read_project
+from openkb.roadmap_service import maybe_complete_phases_for_task
 from openkb.session_service import append_session
 from openkb.state_service import read_state, write_state
+from openkb.watch_service import notify_project_change
 
 _SCAN_COLUMNS: tuple[BoardColumn, ...] = ("backlog", "todo", "doing", "review")
 
@@ -123,17 +126,22 @@ def _touch_state(
     *,
     now: StateNow | None = None,
     recent_entry: str | None = None,
+    advance_next: bool = False,
     agent_id: str,
-) -> None:
+) -> str | None:
     path = _state_path(cfg, slug)
     state = read_state(path) if path.is_file() else StateModel()
+    removed_next: str | None = None
     if now is not None:
         state.now = now
     if recent_entry:
         state.recent_done = [recent_entry, *state.recent_done][:5]
+    if advance_next and state.next_items:
+        removed_next = state.next_items.pop(0)
     state.last_updated = _utc_now().strftime("%Y-%m-%d %H:%M")
     state.updated_by = agent_id
     write_state(path, state, project_slug=slug)
+    return removed_next
 
 
 def list_board(cfg: OpenKBConfig, slug: str) -> dict[BoardColumn, list[TaskModel]]:
@@ -174,6 +182,7 @@ def create_task(
     )
     path = pdir / "board" / "backlog" / f"{task_id}-{slug_part}.md"
     _save_task(path, task, column="backlog")
+    notify_project_change(slug, ["board"])
     return task
 
 
@@ -189,6 +198,7 @@ def move_task(
     task.status = column
     task.updated = _iso(_utc_now())
     dest = _move_task_file(pdir, path, from_col, column, task)
+    notify_project_change(slug, ["board"])
     return _load_task(dest, column)
 
 
@@ -234,6 +244,7 @@ def checkout(
         ),
         agent_id=agent_id,
     )
+    notify_project_change(slug, ["board", "state"])
     return _load_task(dest, "doing")
 
 
@@ -270,7 +281,16 @@ def release(
         now=StateNow(),
         agent_id=agent_id,
     )
+    notify_project_change(slug, ["board", "state"])
     return _load_task(dest, "todo")
+
+
+@dataclass
+class DoneOutcome:
+    task: TaskModel
+    removed_next_item: str | None = None
+    phases_completed: list[str] = field(default_factory=list)
+    phases_activated: list[str] = field(default_factory=list)
 
 
 def done(
@@ -278,7 +298,7 @@ def done(
     slug: str,
     task_id: str,
     agent_id: str,
-) -> TaskModel:
+) -> DoneOutcome:
     pdir = cfg.project_dir(slug)
     path, col = _find_task_path(pdir, task_id)
     task = _load_task(path, col)
@@ -302,14 +322,32 @@ def done(
         "done",
         f"Completed task {task.title}.",
     )
-    _touch_state(
+    removed_next = _touch_state(
         cfg,
         slug,
         now=StateNow(),
         recent_entry=recent_entry,
+        advance_next=True,
         agent_id=agent_id,
     )
-    return _load_task(dest, "done")
+
+    board = list_board(cfg, slug)
+    done_ids = {t.id for t in board["done"]}
+    roadmap_advance = maybe_complete_phases_for_task(
+        cfg,
+        slug,
+        task_id,
+        done_task_ids=done_ids,
+    )
+
+    notify_project_change(slug, ["board", "state", "roadmap"])
+
+    return DoneOutcome(
+        task=_load_task(dest, "done"),
+        removed_next_item=removed_next,
+        phases_completed=roadmap_advance.phases_completed,
+        phases_activated=roadmap_advance.phases_activated,
+    )
 
 
 def _is_available(task: TaskModel, agent_id: str, now: datetime) -> bool:
@@ -332,7 +370,27 @@ def update_task(
             setattr(task, key, value)
     task.updated = _iso(_utc_now())
     _save_task(path, task, col)
+    notify_project_change(slug, ["board"])
     return _load_task(path, col)
+
+
+def delete_task(
+    cfg: OpenKBConfig,
+    slug: str,
+    task_id: str,
+    agent_id: str,
+    *,
+    force: bool = False,
+) -> None:
+    pdir = cfg.project_dir(slug)
+    path, col = _find_task_path(pdir, task_id)
+    task = _load_task(path, col)
+    if col == "done" and not force:
+        raise DeleteForbiddenError("Cannot delete done task without --force")
+    if task.locked_by and _is_lock_valid(task) and task.locked_by != agent_id:
+        raise LockConflictError(task.locked_by)
+    path.unlink(missing_ok=True)
+    notify_project_change(slug, ["board"])
 
 
 def append_note(

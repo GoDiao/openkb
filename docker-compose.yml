@@ -1,0 +1,14 @@
+# OpenKB production-style single container (API + built Hub UI).
+# Mount workspace/ to persist projects across restarts.
+
+services:
+  openkb:
+    build: .
+    ports:
+      - "8788:8788"
+    environment:
+      OPENKB_ROOT: /app
+      UV_CACHE_DIR: /app/.uv-cache
+    volumes:
+      - ./workspace:/app/workspace
+    restart: unless-stopped

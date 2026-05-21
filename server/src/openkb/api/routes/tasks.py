@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from openkb.api.deps import get_config
 from openkb.api.schemas import CheckoutBody, ReleaseBody, TaskCreate, TaskMove, TaskPatch, TaskResponse
@@ -80,3 +80,15 @@ def release_task(
     agent_id = body.agent_id or "human-ui"
     task = task_service.release(cfg, slug, task_id, agent_id)
     return TaskResponse(task=task)
+
+
+@router.delete("/projects/{slug}/tasks/{task_id}", status_code=204)
+def delete_task(
+    slug: str,
+    task_id: str,
+    force: bool = Query(False),
+    agent_id: str = Query("human-ui"),
+    cfg: OpenKBConfig = Depends(get_config),
+) -> None:
+    read_project(cfg, slug)
+    task_service.delete_task(cfg, slug, task_id, agent_id, force=force)

@@ -6,12 +6,13 @@ from pathlib import Path
 import pytest
 
 from openkb.config import OpenKBConfig
-from openkb.errors import LockConflictError, NotFoundError
+from openkb.errors import DeleteForbiddenError, LockConflictError, NotFoundError
 from openkb.markdown_io import read_task_file, write_task_file
-from openkb.models import TaskModel
+from openkb.models import RoadmapModel, RoadmapPhase, StateModel, TaskModel
 from openkb.project_service import create_project
+from openkb.roadmap_service import read_roadmap, write_roadmap
 from openkb.session_service import append_session
-from openkb.state_service import read_state
+from openkb.state_service import read_state, write_state
 from openkb import task_service
 
 
@@ -99,7 +100,7 @@ def test_release_and_done(project_slug: str) -> None:
 
     task_service.checkout(cfg, project_slug, task.id, "agent-a")
     completed = task_service.done(cfg, project_slug, task.id, "agent-a")
-    assert completed.status == "done"
+    assert completed.task.status == "done"
     state = read_state(cfg.project_dir(project_slug) / "STATE.md")
     assert any("Finish me" in item for item in state.recent_done)
 
@@ -150,6 +151,51 @@ def test_get_missing_task_raises(project_slug: str) -> None:
         task_service.get_task(cfg, project_slug, "999")
 
 
+def test_done_advances_next_item(project_slug: str) -> None:
+    cfg = OpenKBConfig.load()
+    pdir = cfg.project_dir(project_slug)
+    write_state(
+        pdir / "STATE.md",
+        StateModel(next_items=["First next", "Second next"]),
+        project_slug=project_slug,
+    )
+    task = task_service.create_task(cfg, project_slug, "Finish me")
+    task_service.checkout(cfg, project_slug, task.id, "agent-a")
+    outcome = task_service.done(cfg, project_slug, task.id, "agent-a")
+    assert outcome.removed_next_item == "First next"
+    state = read_state(pdir / "STATE.md")
+    assert state.next_items == ["Second next"]
+
+
+def test_done_auto_completes_roadmap_phase(project_slug: str) -> None:
+    cfg = OpenKBConfig.load()
+    task = task_service.create_task(cfg, project_slug, "Phase task")
+    write_roadmap(
+        cfg,
+        project_slug,
+        RoadmapModel(
+            phases=[
+                RoadmapPhase(id="p1", title="Phase 1", status="active", tasks=[task.id]),
+                RoadmapPhase(id="p2", title="Phase 2", status="pending", depends_on=["p1"]),
+            ]
+        ),
+    )
+    task_service.checkout(cfg, project_slug, task.id, "agent-a")
+    outcome = task_service.done(cfg, project_slug, task.id, "agent-a")
+    assert outcome.phases_completed == ["p1"]
+    assert outcome.phases_activated == ["p2"]
+    roadmap = read_roadmap(cfg, project_slug)
+    assert get_phase_status(roadmap, "p1") == "done"
+    assert get_phase_status(roadmap, "p2") == "active"
+
+
+def get_phase_status(roadmap: RoadmapModel, phase_id: str) -> str:
+    for phase in roadmap.phases:
+        if phase.id == phase_id:
+            return phase.status
+    raise AssertionError(f"missing phase {phase_id}")
+
+
 def test_append_session(tmp_path: Path) -> None:
     project_dir = tmp_path / "proj"
     project_dir.mkdir()
@@ -158,3 +204,18 @@ def test_append_session(tmp_path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     assert "agent-1" in text
     assert "Summary line." in text
+
+
+def test_delete_task(project_slug: str) -> None:
+    cfg = OpenKBConfig.load()
+    task = task_service.create_task(cfg, project_slug, "Remove me")
+    task_service.delete_task(cfg, project_slug, task.id, "agent-a")
+    board = task_service.list_board(cfg, project_slug)
+    assert not any(t.id == task.id for tasks in board.values() for t in tasks)
+
+    task2 = task_service.create_task(cfg, project_slug, "Done remove")
+    task_service.checkout(cfg, project_slug, task2.id, "agent-a")
+    task_service.done(cfg, project_slug, task2.id, "agent-a")
+    with pytest.raises(DeleteForbiddenError):
+        task_service.delete_task(cfg, project_slug, task2.id, "agent-a")
+    task_service.delete_task(cfg, project_slug, task2.id, "agent-a", force=True)

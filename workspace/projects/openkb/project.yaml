@@ -6,3 +6,6 @@ status: active
 default_branch: main
 lock_ttl_hours: 4
 created: "2026-05-20"
+docs:
+  spec: docs/superpowers/specs/2026-05-20-openkb-design.md
+  plan: docs/superpowers/plans/2026-05-20-openkb.md

@@ -7,3 +7,9 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+.playwright-browsers/
+workspace/projects/e2e-sandbox/
+workspace/projects/e2e-doc-error/
+workspace/projects/hermes-agent-yonoh/
+workspace/projects/plotpilot-storyops-harness/
+web/test-results/

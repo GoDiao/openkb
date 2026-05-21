@@ -44,6 +44,52 @@ def test_project_link(cli_env: Path) -> None:
     assert (cli_env / ".openkb-link").read_text(encoding="utf-8").strip() == "demo"
 
 
+def test_project_create_with_templates(tmp_openkb_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = tmp_openkb_root / "created_repo"
+    repo.mkdir()
+    monkeypatch.chdir(repo)
+    result = runner.invoke(
+        app,
+        [
+            "project",
+            "create",
+            "--slug",
+            "fresh",
+            "--name",
+            "Fresh Project",
+            "--repo-path",
+            str(repo),
+            "--link",
+            "--json",
+        ],
+    )
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["slug"] == "fresh"
+    assert (repo / "docs" / "spec.md").is_file()
+    assert len(data["pending"]) >= 1
+    assert (repo / ".openkb-link").read_text(encoding="utf-8").strip() == "fresh"
+
+    show = runner.invoke(app, ["project", "show", "--json"])
+    assert show.exit_code == 0
+    assert "pending" in json.loads(show.stdout)
+
+
+def test_doc_verify_after_create(tmp_openkb_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo = tmp_openkb_root / "verify_repo"
+    repo.mkdir()
+    monkeypatch.chdir(repo)
+    monkeypatch.setenv("OPENKB_AGENT_ID", "test-agent")
+    runner.invoke(
+        app,
+        ["project", "create", "--slug", "v", "--name", "V", "--repo-path", str(repo), "--json"],
+    )
+    result = runner.invoke(app, ["doc", "verify", "--json"])
+    assert result.exit_code == 0
+    data = json.loads(result.stdout)
+    assert data["all_hub_visible"] is True
+
+
 def test_context_json(cli_env: Path) -> None:
     (cli_env / ".openkb-link").write_text("demo\n", encoding="utf-8")
     result = runner.invoke(app, ["context", "--json"])
@@ -51,6 +97,8 @@ def test_context_json(cli_env: Path) -> None:
     data = json.loads(result.stdout)
     assert data["project"] == "demo"
     assert "state" in data
+    assert "docs" in data
+    assert "roadmap" in data
     assert data["checked_out_by_me"] is False
 
 
@@ -157,6 +205,78 @@ def test_checkout_lock_conflict_exit_2(cli_env: Path, monkeypatch: pytest.Monkey
     data = json.loads(result.stdout)
     assert data["error"] == "locked"
     assert data["owner"] == "other-agent"
+
+
+def test_status_reflects_lock_after_checkout(cli_env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (cli_env / ".openkb-link").write_text("demo\n", encoding="utf-8")
+    monkeypatch.setenv("OPENKB_AGENT_ID", "agent-a")
+    runner.invoke(app, ["task", "create", "--title", "Lock status", "--json"])
+    runner.invoke(app, ["checkout", "001", "--json"])
+
+    status = runner.invoke(app, ["status", "--json"])
+    assert status.exit_code == 0
+    board = json.loads(status.stdout)
+    assert len(board["doing"]) == 1
+    task = board["doing"][0]
+    assert task["locked_by"] == "agent-a"
+    assert task["lock_expires"]
+
+
+def test_roadmap_and_state_cli(cli_env: Path) -> None:
+    (cli_env / ".openkb-link").write_text("demo\n", encoding="utf-8")
+    cfg = OpenKBConfig.load()
+    from openkb.models import RoadmapModel, RoadmapPhase
+    from openkb.roadmap_service import write_roadmap
+
+    write_roadmap(
+        cfg,
+        "demo",
+        RoadmapModel(phases=[RoadmapPhase(id="p1", title="One", status="active")]),
+    )
+
+    roadmap = runner.invoke(app, ["roadmap", "--json"])
+    assert roadmap.exit_code == 0
+    assert json.loads(roadmap.stdout)["progress"]["total"] == 1
+
+    state_set = runner.invoke(
+        app,
+        ["state", "set", "--summary", "Working", "--next", "Ship it", "--json"],
+    )
+    assert state_set.exit_code == 0
+    state = json.loads(state_set.stdout)["state"]
+    assert state["summary"] == "Working"
+    assert state["next_items"] == ["Ship it"]
+
+    done = runner.invoke(app, ["task", "create", "--title", "Task", "--json"])
+    task_id = json.loads(done.stdout)["task"]["id"]
+    runner.invoke(app, ["checkout", task_id, "--json"])
+    finished = runner.invoke(app, ["done", task_id, "--json"])
+    payload = json.loads(finished.stdout)
+    assert payload["removed_next_item"] == "Ship it"
+
+
+def test_done_human_output_with_unicode_next(cli_env: Path) -> None:
+    (cli_env / ".openkb-link").write_text("demo\n", encoding="utf-8")
+    runner.invoke(
+        app,
+        ["state", "set", "--next", "下一步 «里程碑»", "--json"],
+    )
+    create = runner.invoke(app, ["task", "create", "--title", "中文任务", "--json"])
+    task_id = json.loads(create.stdout)["task"]["id"]
+    runner.invoke(app, ["checkout", task_id, "--json"])
+    result = runner.invoke(app, ["done", task_id])
+    assert result.exit_code == 0
+    assert "Done" in result.stdout
+    assert "Next advanced" in result.stdout
+
+
+def test_task_delete_cli(cli_env: Path) -> None:
+    (cli_env / ".openkb-link").write_text("demo\n", encoding="utf-8")
+    create = runner.invoke(app, ["task", "create", "--title", "Trash", "--json"])
+    task_id = json.loads(create.stdout)["task"]["id"]
+    deleted = runner.invoke(app, ["task", "delete", task_id, "--json"])
+    assert deleted.exit_code == 0
+    assert json.loads(deleted.stdout)["deleted"] == task_id
 
 
 def test_api_health() -> None:

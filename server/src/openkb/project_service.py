@@ -24,10 +24,11 @@ def write_project_yaml(
     default_branch: str = "main",
     lock_ttl_hours: int = 4,
     created: str | None = None,
+    docs: dict[str, str] | None = None,
 ) -> Path:
     pdir = root / "workspace" / "projects" / slug
     pdir.mkdir(parents=True, exist_ok=True)
-    data = {
+    data: dict = {
         "slug": slug,
         "name": name,
         "repo_path": repo_path,
@@ -37,6 +38,8 @@ def write_project_yaml(
         "lock_ttl_hours": lock_ttl_hours,
         "created": created or date.today().isoformat(),
     }
+    if docs:
+        data["docs"] = docs
     path = pdir / "project.yaml"
     path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     return path
@@ -106,5 +109,34 @@ def archive_project(cfg: OpenKBConfig, slug: str) -> ProjectModel:
         default_branch=project.default_branch,
         lock_ttl_hours=project.lock_ttl_hours,
         created=project.created,
+        docs=project.docs.model_dump() if project.docs.spec or project.docs.plan else None,
+    )
+    return read_project(cfg, slug)
+
+
+def update_project_docs(
+    cfg: OpenKBConfig,
+    slug: str,
+    *,
+    spec: str | None = None,
+    plan: str | None = None,
+) -> ProjectModel:
+    project = read_project(cfg, slug)
+    docs = project.docs.model_copy()
+    if spec is not None:
+        docs.spec = spec
+    if plan is not None:
+        docs.plan = plan
+    write_project_yaml(
+        cfg.root,
+        slug,
+        name=project.name,
+        repo_path=project.repo_path,
+        description=project.description,
+        status=project.status,
+        default_branch=project.default_branch,
+        lock_ttl_hours=project.lock_ttl_hours,
+        created=project.created,
+        docs=docs.model_dump() if docs.spec or docs.plan else None,
     )
     return read_project(cfg, slug)
