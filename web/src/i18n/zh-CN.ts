@@ -84,6 +84,21 @@ export const zhCN: Messages = {
     apiError: "无法连接 API。请先运行",
     current: "当前",
     blocker: "阻塞",
+    hero: {
+      preview: "openkb — Hub 预览",
+      kanban: "看板",
+      roadmap: "路线图",
+      todo: "待办",
+      doing: "进行中",
+      done: "已完成",
+      agentSync: "Agent 同步",
+      writeSpec: "编写 Spec",
+      buildUi: "构建 UI",
+      setupRepo: "初始化 repo",
+      setup: "初始化",
+      core: "核心",
+      polish: "打磨",
+    },
   },
   project: {
     back: "← 返回项目列表",
@@ -224,7 +239,7 @@ export const zhCN: Messages = {
     allDone: "全部完成 — 可以收起此清单。",
     steps: {
       patch: {
-        title: "安装 Agent onboarding patch",
+        title: "安装 Agent 入门补丁",
         desc: "将 OpenKB 说明合并进 Agent 配置（见帮助 → 一次性配置）。",
       },
       create: {
