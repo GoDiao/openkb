@@ -110,7 +110,7 @@ uv run openkb serve --port 8788
 docker compose up --build
 ```
 
-详见 [UPGRADE.md](UPGRADE.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md)。
+详见 [UPGRADE.md](UPGRADE.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/DEPLOYMENT.zh-CN.md](docs/DEPLOYMENT.zh-CN.md)。
 
 ### 5. 验证
 
