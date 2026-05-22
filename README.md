@@ -1,5 +1,10 @@
 # OpenKB
 
+[![License](https://img.shields.io/github/license/GoDiao/openkb)](https://github.com/GoDiao/openkb)
+[![Stars](https://img.shields.io/github/stars/GoDiao/openkb)](https://github.com/GoDiao/openkb)
+[![Issues](https://img.shields.io/github/issues/GoDiao/openkb)](https://github.com/GoDiao/openkb/issues)
+
+
 **Agents sync progress via CLI. Humans read Spec, Plan, and the roadmap in one Web Hub.**
 
 Centralized **Agent Kanban + project state hub**: coding agents align progress via CLI; humans manage Spec / Plan / decisions in the Web UI.
