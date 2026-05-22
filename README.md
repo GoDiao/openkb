@@ -185,7 +185,7 @@ OpenKB **1.x has no authentication**. Intended for **localhost or a trusted priv
 | `127.0.0.1` on your machine | Bind `0.0.0.0:8788` on a public VPS without TLS + auth |
 | LAN / VPN / private Docker | Market as multi-tenant SaaS without building auth (v2) |
 
-Details: [SECURITY.md](SECURITY.md) · Narrative: [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md)
+Details: [SECURITY.md](SECURITY.md) · Deployment: [nginx basic auth](docs/deploy/nginx-basic-auth.md) · Narrative: [docs/WHY_OPENKB.md](docs/WHY_OPENKB.md)
 
 ---
 
