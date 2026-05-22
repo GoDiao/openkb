@@ -1,15 +1,16 @@
 import { motion } from "framer-motion";
+import { useI18n } from "../../i18n/I18nProvider";
 
 const DEMO_COLUMNS = [
-  { id: "todo", label: "Todo", cards: ["Agent sync", "Write spec"] },
-  { id: "doing", label: "Doing", cards: ["Build UI"] },
-  { id: "done", label: "Done", cards: ["Setup repo"] },
+  { id: "todo", labelKey: "projects.hero.todo", cardKeys: ["projects.hero.agentSync", "projects.hero.writeSpec"] },
+  { id: "doing", labelKey: "projects.hero.doing", cardKeys: ["projects.hero.buildUi"] },
+  { id: "done", labelKey: "projects.hero.done", cardKeys: ["projects.hero.setupRepo"] },
 ];
 
 const DEMO_PHASES = [
-  { id: "p1", label: "Setup", status: "done" as const, x: 12, y: 48 },
-  { id: "p2", label: "Core", status: "active" as const, x: 108, y: 28 },
-  { id: "p3", label: "Polish", status: "pending" as const, x: 204, y: 48 },
+  { id: "p1", labelKey: "projects.hero.setup", status: "done" as const, x: 12, y: 48 },
+  { id: "p2", labelKey: "projects.hero.core", status: "active" as const, x: 108, y: 28 },
+  { id: "p3", labelKey: "projects.hero.polish", status: "pending" as const, x: 204, y: 48 },
 ];
 
 const STATUS_COLOR = {
@@ -19,6 +20,8 @@ const STATUS_COLOR = {
 };
 
 export function HubHeroDemo() {
+  const { t } = useI18n();
+
   return (
     <div
       className="relative mx-auto w-full max-w-xl"
@@ -29,13 +32,13 @@ export function HubHeroDemo() {
           <span className="h-2.5 w-2.5 rounded-full bg-[var(--priority-p0)]/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-[var(--phase-active)]/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-[var(--phase-done)]/70" />
-          <span className="ml-2 font-mono text-[10px] text-[var(--text-muted)]">openkb — hub preview</span>
+          <span className="ml-2 font-mono text-[10px] text-[var(--text-muted)]">{t("projects.hero.preview")}</span>
         </div>
 
         <div className="grid gap-4 p-4 md:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="m-0 mb-2 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]">
-              Kanban
+              {t("projects.hero.kanban")}
             </p>
             <div className="flex gap-2">
               {DEMO_COLUMNS.map((col, colIdx) => (
@@ -43,11 +46,11 @@ export function HubHeroDemo() {
                   key={col.id}
                   className="min-h-[140px] flex-1 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-base)]/70 p-2"
                 >
-                  <p className="m-0 mb-2 text-[9px] font-medium text-[var(--text-muted)]">{col.label}</p>
+                  <p className="m-0 mb-2 text-[9px] font-medium text-[var(--text-muted)]">{t(col.labelKey)}</p>
                   <div className="space-y-1.5">
-                    {col.cards.map((title, cardIdx) => (
+                    {col.cardKeys.map((cardKey, cardIdx) => (
                       <motion.div
-                        key={title}
+                        key={cardKey}
                         className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-2 py-1.5 text-[9px] text-[var(--text-primary)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -58,7 +61,7 @@ export function HubHeroDemo() {
                           damping: 32,
                         }}
                       >
-                        {title}
+                        {t(cardKey)}
                       </motion.div>
                     ))}
                   </div>
@@ -75,7 +78,7 @@ export function HubHeroDemo() {
 
           <div>
             <p className="m-0 mb-2 text-[10px] font-medium uppercase tracking-widest text-[var(--text-muted)]">
-              Roadmap
+              {t("projects.hero.roadmap")}
             </p>
             <div className="relative h-[168px] rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-base)]/70">
               <svg className="absolute inset-0 h-full w-full" aria-hidden>
@@ -116,7 +119,7 @@ export function HubHeroDemo() {
                   />
                   <div className="px-2 py-1.5">
                     <p className="m-0 font-mono text-[8px] text-[var(--accent)]">{phase.id}</p>
-                    <p className="m-0 mt-0.5 text-[9px] font-medium text-[var(--text-primary)]">{phase.label}</p>
+                    <p className="m-0 mt-0.5 text-[9px] font-medium text-[var(--text-primary)]">{t(phase.labelKey)}</p>
                   </div>
                   {phase.status === "done" && (
                     <motion.span
